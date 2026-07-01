@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediLong Advanced · Hospital Pharmacy Management System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    .hidden { display: none; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #f5f7fb; color: #1e293b; line-height: 1.5; }
+    .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 280px; background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05); padding: 2rem 1.2rem; display: flex; flex-direction: column; z-index: 30; border-right: 1px solid #e2e8f0; }
+    .logo { display: flex; align-items: center; gap: 1rem; padding-bottom: 1.5rem; border-bottom: 2px solid #e2e8f0; margin-bottom: 1rem; }
+    .logo-icon { background: linear-gradient(135deg, #1e40af, #3b82f6); width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: white; box-shadow: 0 4px 10px rgba(59,130,246,0.3); }
+    .logo-text { font-weight: 800; font-size: 1.4rem; color: #1e3a5f; }
+    .logo-text span { color: #3b82f6; }
+    .nav-section { margin: 1rem 0 0.5rem; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; padding-left: 1rem; }
+    .nav-btn { display: flex; align-items: center; gap: 1rem; width: 100%; padding: 0.8rem 1rem; margin: 0.25rem 0; border-radius: 12px; background: transparent; border: none; font-weight: 500; font-size: 0.9rem; color: #475569; cursor: pointer; transition: all 0.2s ease; text-align: left; }
+    .nav-btn i { width: 24px; font-size: 1.1rem; color: #94a3b8; }
+    .nav-btn.active { background: linear-gradient(135deg, #eff6ff, #dbeafe); color: #2563eb; }
+    .nav-btn.active i { color: #2563eb; }
+    .nav-btn:hover:not(.active) { background: #f1f5f9; color: #1e40af; }
+    .main { margin-left: 280px; padding: 1.5rem 2rem; }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #e2e8f0; }
+    .page-title { font-size: 1.8rem; font-weight: 700; color: #0f172a; }
+    .header-stats { display: flex; gap: 1rem; align-items: center; }
+    .header-badge { background: white; padding: 0.5rem 1rem; border-radius: 30px; font-size: 0.85rem; font-weight: 500; color: #475569; border: 1px solid #e2e8f0; }
+    .clock { background: white; border: 1px solid #e2e8f0; border-radius: 30px; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 500; color: #1e293b; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .stat-card { background: white; border-radius: 20px; padding: 1.5rem; border: 1px solid #e2e8f0; transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-color: #3b82f6; }
+    .stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+    .stat-header i { font-size: 2rem; color: #3b82f6; opacity: 0.7; }
+    .stat-value { font-size: 2.2rem; font-weight: 800; color: #0f172a; }
+    .stat-label { font-size: 0.85rem; color: #64748b; margin-top: 0.3rem; }
+    .stat-change { font-size: 0.75rem; margin-top: 0.5rem; color: #10b981; }
+    .card { background: white; border-radius: 20px; border: 1px solid #e2e8f0; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; padding-bottom: 0.8rem; border-bottom: 2px solid #f1f5f9; }
+    .card-header h3 { font-size: 1.1rem; font-weight: 600; color: #0f172a; }
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 1rem 0.8rem; background: #f8fafc; color: #475569; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0; }
+    td { padding: 0.8rem; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+    tr:hover { background: #f8fafc; }
+    .badge { display: inline-block; padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-warning { background: #fef9c3; color: #854d0e; }
+    .badge-danger { background: #fee2e2; color: #991b1b; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+    .btn { padding: 0.6rem 1.2rem; border-radius: 10px; font-weight: 500; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; border: none; }
+    .btn-primary { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+    .btn-outline { background: white; border: 1px solid #cbd5e1; color: #475569; }
+    .btn-outline:hover { background: #f8fafc; border-color: #3b82f6; }
+    .btn-sm { padding: 0.3rem 0.8rem; font-size: 0.75rem; }
+    input, select, textarea { width: 100%; padding: 0.7rem 1rem; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 0.85rem; transition: all 0.2s; }
+    input:focus, select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    label { font-size: 0.75rem; font-weight: 600; display: block; margin-bottom: 0.3rem; color: #475569; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mt-3 { margin-top: 1rem; }
+    .mb-3 { margin-bottom: 1rem; }
+    .text-center { text-align: center; }
+    .inventory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
+    .inventory-item { background: white; border-radius: 16px; padding: 1rem; border: 1px solid #e2e8f0; transition: all 0.2s; }
+    .inventory-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: #3b82f6; }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; }
+    .modal-content { background: white; border-radius: 24px; max-width: 550px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 1.8rem; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #f1f5f9; }
+    .fab { position: fixed; bottom: 2rem; right: 2rem; background: linear-gradient(135deg, #2563eb, #1d4ed8); width: 56px; height: 56px; border-radius: 28px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.4rem; cursor: pointer; z-index: 40; box-shadow: 0 4px 15px rgba(37,99,235,0.4); transition: all 0.2s; }
+    .fab:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(37,99,235,0.5); }
+    #invCheckModal .modal-content { max-width: 740px; width: 95%; }
+    .inv-check-header { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.4rem; padding-bottom: 1rem; border-bottom: 2px solid #f1f5f9; }
+    .inv-check-header .ic-icon { background: linear-gradient(135deg, #7c3aed, #a855f7); width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; flex-shrink: 0; }
+    .ic-input-area { background: #f8fafc; border-radius: 14px; padding: 1rem; border: 1px solid #e2e8f0; margin-bottom: 1rem; }
+    .ic-input-area label { font-size: 0.8rem; font-weight: 600; color: #7c3aed; display: block; margin-bottom: 0.5rem; }
+    .ic-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.7rem; min-height: 36px; }
+    .ic-tag { display: inline-flex; align-items: center; gap: 0.4rem; background: linear-gradient(135deg, #ede9fe, #ddd6fe); color: #6d28d9; padding: 0.3rem 0.7rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; animation: tagIn 0.2s ease; }
+    @keyframes tagIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .ic-tag button { background: none; border: none; color: #7c3aed; cursor: pointer; font-size: 0.85rem; padding: 0; line-height: 1; width: auto; }
+    .ic-add-row { display: flex; gap: 0.6rem; }
+    .ic-add-row input { flex: 1; border-radius: 8px; }
+    .ic-add-row button { flex-shrink: 0; }
+    #icResults { display: flex; flex-direction: column; gap: 0.8rem; }
+    .ic-result-item { border-radius: 14px; padding: 1rem 1.2rem; display: flex; align-items: flex-start; gap: 1rem; transition: transform 0.15s ease; animation: slideIn 0.25s ease; }
+    @keyframes slideIn { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .ic-result-item:hover { transform: translateY(-2px); }
+    .ic-result-item.found { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1.5px solid #86efac; }
+    .ic-result-item.not-found { background: linear-gradient(135deg, #fef2f2, #fee2e2); border: 1.5px solid #fca5a5; }
+    .ic-status-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+    .found .ic-status-icon { background: #16a34a; color: white; }
+    .not-found .ic-status-icon { background: #dc2626; color: white; }
+    .ic-result-body { flex: 1; }
+    .ic-med-name { font-weight: 700; font-size: 0.95rem; color: #0f172a; margin-bottom: 0.3rem; }
+    .ic-med-detail { font-size: 0.82rem; color: #64748b; }
+    .ic-alt-section { margin-top: 0.6rem; }
+    .ic-alt-title { font-size: 0.75rem; font-weight: 700; color: #b45309; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem; }
+    .ic-best-alt { background: linear-gradient(135deg, #fff7ed, #ffedd5); border: 1.5px solid #fb923c; border-radius: 12px; padding: 0.65rem 0.9rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.7rem; }
+    .ic-best-alt-icon { width: 32px; height: 32px; background: linear-gradient(135deg, #ea580c, #f97316); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.9rem; flex-shrink: 0; }
+    .ic-best-alt-body { flex: 1; }
+    .ic-best-alt-name { font-weight: 700; font-size: 0.88rem; color: #92400e; margin-bottom: 0.2rem; }
+    .ic-best-alt-detail { font-size: 0.76rem; color: #78716c; }
+    .ic-confidence-badge { font-size: 0.65rem; font-weight: 700; border-radius: 20px; padding: 0.1rem 0.5rem; text-transform: uppercase; letter-spacing: 0.3px; }
+    .ic-confidence-badge.exact  { background: #dcfce7; color: #15803d; }
+    .ic-confidence-badge.high   { background: #dbeafe; color: #1d4ed8; }
+    .ic-confidence-badge.medium { background: #fef9c3; color: #854d0e; }
+    .ic-confidence-badge.low    { background: #f3e8ff; color: #6d28d9; }
+    .ic-alt-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .ic-alt-pill { background: white; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 0.22rem 0.7rem; font-size: 0.76rem; font-weight: 600; color: #475569; display: inline-flex; align-items: center; gap: 0.3rem; }
+    .ic-stock-badge { background: #16a34a; color: white; border-radius: 20px; padding: 0.18rem 0.55rem; font-size: 0.72rem; font-weight: 700; }
+    .ic-price-badge { background: #2563eb; color: white; border-radius: 20px; padding: 0.18rem 0.55rem; font-size: 0.72rem; font-weight: 700; }
+    .ic-no-alt { font-size: 0.8rem; color: #94a3b8; font-style: italic; }
+    .ic-check-btn { background: linear-gradient(135deg, #7c3aed, #a855f7); color: white; border: none; padding: 0.7rem 1.8rem; border-radius: 10px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem; }
+    .ic-check-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(124,58,237,0.35); }
+    .ic-summary-bar { display: flex; gap: 0.8rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .ic-summary-chip { padding: 0.35rem 0.9rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+    .ic-summary-chip.total { background: #ede9fe; color: #5b21b6; }
+    .ic-summary-chip.avail { background: #dcfce7; color: #15803d; }
+    .ic-summary-chip.missing { background: #fee2e2; color: #b91c1c; }
+    #viewPatientModal .modal-content { max-width: 700px; width: 95%; }
+    .patient-profile-header { display: flex; align-items: center; gap: 1.2rem; background: linear-gradient(135deg, #eff6ff, #dbeafe); border-radius: 16px; padding: 1.2rem 1.4rem; margin-bottom: 1.4rem; border: 1px solid #bfdbfe; }
+    .patient-avatar { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #1d4ed8); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; flex-shrink: 0; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+    .patient-profile-info h3 { font-size: 1.15rem; font-weight: 700; color: #0f172a; }
+    .patient-profile-info p { font-size: 0.82rem; color: #475569; margin-top: 0.2rem; }
+    .patient-meta-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1.2rem; }
+    .patient-meta-chip { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 20px; padding: 0.3rem 0.75rem; font-size: 0.78rem; color: #334155; font-weight: 500; display: inline-flex; align-items: center; gap: 0.4rem; }
+    .patient-meta-chip i { color: #3b82f6; }
+    .rx-section-title { font-size: 0.9rem; font-weight: 700; color: #0f172a; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
+    .rx-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1rem 1.2rem; margin-bottom: 0.8rem; transition: box-shadow 0.2s; }
+    .rx-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    .rx-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.7rem; }
+    .rx-card-header .rx-id { font-size: 0.78rem; font-weight: 700; color: #2563eb; background: #dbeafe; border-radius: 8px; padding: 0.15rem 0.55rem; }
+    .rx-doctor { font-size: 0.82rem; color: #475569; margin-bottom: 0.6rem; }
+    .rx-medicine-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .rx-medicine-table th { background: #e2e8f0; color: #334155; font-size: 0.75rem; padding: 0.4rem 0.7rem; text-align: left; border-bottom: none; }
+    .rx-medicine-table td { padding: 0.5rem 0.7rem; border-bottom: 1px solid #f1f5f9; color: #0f172a; }
+    .rx-empty { text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.9rem; }
+    .rx-empty i { font-size: 2rem; display: block; margin-bottom: 0.5rem; color: #cbd5e1; }
+    @media (max-width: 1024px) { .grid-3 { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 768px) {
+      .sidebar { width: 80px; padding: 1rem 0.5rem; }
+      .sidebar .logo-text, .sidebar .nav-btn span:not(i), .nav-section { display: none; }
+      .main { margin-left: 80px; padding: 1rem; }
+      .nav-btn { justify-content: center; }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-icon"><i class="fas fa-hospital-user"></i></div>
+    <div class="logo-text">Medi<span>LONG</span></div>
+  </div>
+  
+  <div id="userProfileWidget" style="padding: 0.8rem; background: #f1f5f9; border-radius: 12px; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+    <div style="background: #2563eb; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700;" id="userAvatarIcon">👤</div>
+    <div>
+      <div style="font-size: 0.85rem; font-weight: 700; color: #0f172a;" id="sidebarUserName">Loading Staff...</div>
+      <div style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: 600;" id="sidebarUserRole">Staff</div>
+    </div>
+  </div>
+
+  <div class="nav-section">Main</div>
+  <button class="nav-btn active" data-page="dashboard"><i class="fas fa-chart-pie"></i> <span>Dashboard</span></button>
+  <button class="nav-btn" data-page="inventory"><i class="fas fa-pills"></i> <span>Inventory</span></button>
+  <button class="nav-btn" data-page="patients"><i class="fas fa-users"></i> <span>Patients</span></button>
+  <div class="nav-section">Operations</div>
+  <button class="nav-btn" data-page="billing"><i class="fas fa-receipt"></i> <span>Billing</span></button>
+  <div class="nav-section">Reports</div>
+  <button class="nav-btn" data-page="expiry"><i class="fas fa-hourglass-half"></i> <span>Expiry</span></button>
+  <button class="nav-btn" data-page="analytics"><i class="fas fa-chart-line"></i> <span>Analytics</span></button>
+  <button class="nav-btn" id="logoutBtn" style="margin-top: auto; background:#fee2e2; color:#b91c1c;"><i class="fas fa-sign-out-alt"></i> <span>Log Out</span></button>
+</div>
+
+<div class="main">
+  <div class="top-bar">
+    <h1 class="page-title" id="pageTitle">Dashboard Overview</h1>
+    <div class="header-stats">
+      <div class="header-badge"><i class="fas fa-bell"></i> <span id="alertCount">0</span> Alerts</div>
+      <div class="clock" id="clock"></div>
+    </div>
+  </div>
+
+  <section id="dashboardSec" class="page">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-header"><span>Total Revenue</span><i class="fas fa-rupee-sign"></i></div><div class="stat-value">₹<span id="dashRevenue">0</span></div><div class="stat-label">All time database record</div><div class="stat-change"><i class="fas fa-arrow-up"></i> Live Synchronized</div></div>
+      <div class="stat-card"><div class="stat-header"><span>Total Orders</span><i class="fas fa-shopping-cart"></i></div><div class="stat-value"><span id="dashOrders">0</span></div><div class="stat-label">Processed Bills</div><div class="stat-change"><i class="fas fa-arrow-up"></i> Live Data</div></div>
+      <div class="stat-card"><div class="stat-header"><span>Low Stock</span><i class="fas fa-exclamation-triangle"></i></div><div class="stat-value"><span id="dashLowStock">0</span></div><div class="stat-label">Items below threshold</div><div class="stat-change" style="color:#eab308;">Needs attention</div></div>
+      <div class="stat-card"><div class="stat-header"><span>Expiring Soon</span><i class="fas fa-calendar-warning"></i></div><div class="stat-value"><span id="dashExpiring">0</span></div><div class="stat-label">Within 30 days</div><div class="stat-change" style="color:#eab308;">Review needed</div></div>
+    </div>
+    
+    <div class="grid-2">
+      <div class="card"><div class="card-header"><h3>Revenue Trend</h3><i class="fas fa-chart-line" style="color:#3b82f6;"></i></div><canvas id="revenueChart" style="height:250px;"></canvas></div>
+      <div class="card"><div class="card-header"><h3>Top Selling Medicines</h3><i class="fas fa-trophy" style="color:#f59e0b;"></i></div><div id="topProductsList" style="margin-top:0.5rem;"></div></div>
+    </div>
+    
+    <div class="card"><div class="card-header"><h3>Recent Transactions</h3><button class="btn btn-outline btn-sm" onclick="exportReport()"><i class="fas fa-download"></i> Export</button></div><div class="table-container"><table id="recentTransactionsTable"><thead><tr><th>Bill ID</th><th>Patient</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead><tbody></tbody></table></div></div>
+  </section>
+
+  <section id="inventorySec" class="page hidden">
+    <div class="flex-between" style="margin-bottom: 1.5rem;">
+      <h2 style="color:#0f172a;">💊 Medicine Inventory</h2>
+      <div style="display: flex; gap: 0.8rem; align-items: center;">
+        <button class="btn" style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;" onclick="openInvChecker()"><i class="fas fa-search-plus"></i> Check Inventory</button>
+        <input type="text" id="searchInv" placeholder="Search medicine..." style="width: 250px;">
+        <button class="btn btn-primary" onclick="showModal('addMedicineModal')"><i class="fas fa-plus"></i> Add Medicine</button>
+      </div>
+    </div>
+    <div class="category-filters" id="inventoryCategoryFilters" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem;"></div>
+    <div id="inventoryList"></div>
+  </section>
+
+  <section id="patientsSec" class="page hidden">
+    <div class="flex-between" style="margin-bottom: 1.5rem;">
+      <h2>👥 Patient Management</h2>
+      <button class="btn btn-primary" onclick="showModal('addPatientModal')"><i class="fas fa-user-plus"></i> Register Patient</button>
+    </div>
+    <div class="card"><div class="table-container"><table id="patientsTable"><thead><tr><th>ID</th><th>Name</th><th>Age/Gender</th><th>Contact</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
+  </section>
+
+  <section id="billingSec" class="page hidden">
+    <h2 style="margin-bottom: 1rem;">🧾 Billing Counter</h2>
+    <div class="grid-2">
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <div class="card">
+          <h3 style="margin-bottom: 1rem; color: #1e3a5f;"><i class="fas fa-user-injured" style="color: #2563eb; margin-right: 0.5rem;"></i>Customer Details</h3>
+          <div class="mb-3">
+            <label>Select Existing Patient</label>
+            <select id="billPatientSelect" onchange="handleBillPatientChange()" style="width: 100%;"></select>
+          </div>
+          
+          <div id="newPatientFields">
+            <div class="grid-2">
+              <div>
+                <label>Customer Name *</label>
+                <input type="text" id="billPatientName" placeholder="Enter name">
+              </div>
+              <div>
+                <label>Phone Number *</label>
+                <input type="text" id="billPatientPhone" placeholder="Enter phone">
+              </div>
+            </div>
+            <div class="grid-2 mt-2">
+              <div>
+                <label>Age</label>
+                <input type="number" id="billPatientAge" placeholder="Age">
+              </div>
+              <div>
+                <label>Gender</label>
+                <select id="billPatientGender">
+                  <option>Male</option>
+                  <option>Female</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="mt-2">
+              <label>Address</label>
+              <input type="text" id="billPatientAddress" placeholder="Enter address">
+            </div>
+          </div>
+          
+          <div id="selectedPatientInfo" class="hidden mt-2" style="background: #f8fafc; padding: 0.8rem; border-radius: 10px; border: 1px solid #e2e8f0;">
+            <strong>Selected Patient:</strong> <span id="billSelectedPatientName" style="color: #2563eb; font-weight: 600;">None</span><br>
+            <small style="color: #64748b;">Phone: <span id="billSelectedPatientPhone">-</span> &nbsp;|&nbsp; Gender/Age: <span id="billSelectedPatientMeta">-</span></small>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom: 1rem; color: #1e3a5f;"><i class="fas fa-pills" style="color: #10b981; margin-right: 0.5rem;"></i>Add Items</h3>
+          <input type="text" id="billSearch" placeholder="Search medicine..." oninput="renderBillSearch()" class="mb-2">
+          <div id="billSearchResults" style="max-height: 250px; overflow-y: auto;"></div>
+        </div>
+      </div>
+
+      <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <h3 style="margin-bottom: 1rem; color: #1e3a5f;"><i class="fas fa-shopping-cart" style="color: #f59e0b; margin-right: 0.5rem;"></i>Cart</h3>
+          <div id="cartItems" style="max-height: 300px; overflow-y: auto;"></div>
+        </div>
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+          <div class="flex-between">
+            <strong>Total:</strong>
+            <span style="font-size: 1.5rem; font-weight: 700; color: #2563eb;">₹<span id="cartTotal">0</span></span>
+          </div>
+          <label class="mt-2">Payment Method</label>
+          <select id="paymentMethod" class="mb-2">
+            <option>CASH</option>
+            <option>CARD</option>
+            <option>UPI</option>
+            <option>INSURANCE</option>
+          </select>
+          <button onclick="processCheckout()" class="btn btn-primary" style="width:100%; font-size: 1rem; padding: 0.8rem;"><i class="fas fa-file-invoice-dollar" style="margin-right: 0.4rem;"></i>Generate Bill</button>
+        </div>
+      </div>
+    </div>
+    <div class="card mt-2"><h3>Recent Bills</h3><div id="recentBillsList"></div></div>
+  </section>
+
+  <section id="expirySec" class="page hidden">
+    <h2 style="margin-bottom: 1rem;">⏰ Expiry Tracking</h2>
+    <div class="grid-2">
+      <div class="card"><h3 style="color:#dc2626;">❌ Expired Medicines</h3><div id="expiredList"></div></div>
+      <div class="card"><h3 style="color:#eab308;">⚠️ Expiring Soon (≤30 days)</h3><div id="expiringList"></div></div>
+    </div>
+    <div class="card mt-2"><h3>📋 Complete Expiry Log</h3><div id="allExpiryList"></div></div>
+  </section>
+
+  <section id="analyticsSec" class="page hidden">
+    <h2 style="margin-bottom: 1rem;">📊 Advanced Analytics</h2>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-header"><span>Gross Profit Margin</span><i class="fas fa-chart-simple"></i></div><div class="stat-value">68<span style="font-size:1rem;">%</span></div></div>
+      <div class="stat-card"><div class="stat-header"><span>Inventory Turnover</span><i class="fas fa-rotate"></i></div><div class="stat-value">4.2<span style="font-size:1rem;">x</span></div></div>
+      <div class="stat-card"><div class="stat-header"><span>Average Order Value</span><i class="fas fa-shopping-bag"></i></div><div class="stat-value">₹<span id="avgOrderValue">0</span></div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card"><h3>Stock Movement History</h3><canvas id="stockMovementChart" style="height:250px;"></canvas></div>
+      <div class="card"><h3>Category Distribution</h3><canvas id="categoryChart" style="height:250px;"></canvas></div>
+    </div>
+  </section>
+</div>
+
+<div class="fab" onclick="showModal('addMedicineModal')"><i class="fas fa-plus"></i></div>
+
+<div id="addMedicineModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>Add New Medicine</h3><button onclick="closeModal('addMedicineModal')" style="background:none; border:none; font-size:1.5rem;">&times;</button></div><form id="addMedicineForm"><div class="grid-2"><div><label>Medicine Name *</label><input id="medName" required></div><div><label>SKU / Barcode</label><input id="medSku"></div><div><label>Dosage / Salt</label><input id="medDosage"></div><div><label>Price (₹) *</label><input id="medPrice" type="number" required></div><div><label>Stock Quantity *</label><input id="medQty" type="number" required></div><div><label>Low Stock Alert</label><input id="medThreshold" type="number" value="10"></div><div><label>Expiry Date</label><input id="medExpiry" type="date"></div><div><label>Category</label><select id="medCategory"><option value="Tablet">Tablet</option><option value="Capsule">Capsule</option><option value="Syrup">Syrup</option><option value="Injection">Injection</option><option value="Cream">Cream</option><option value="Lotion">Lotion</option><option value="Others">Others</option></select></div></div><div class="flex-between mt-3"><button type="button" onclick="closeModal('addMedicineModal')" class="btn btn-outline">Cancel</button><button type="submit" class="btn btn-primary">Save Medicine</button></div></form></div></div>
+
+<div id="addPatientModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>Register New Patient</h3><button onclick="closeModal('addPatientModal')" style="background:none; border:none; font-size:1.5rem;">&times;</button></div><form id="addPatientForm"><div class="grid-2"><div><label>Full Name *</label><input id="patName" required></div><div><label>Age</label><input id="patAge" type="number"></div><div><label>Gender</label><select id="patGender"><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div><div><label>Phone *</label><input id="patPhone" required></div><div><label>Email</label><input id="patEmail" type="email"></div><div><label>Address</label><textarea id="patAddress" rows="2"></textarea></div></div><div class="flex-between mt-3"><button type="button" onclick="closeModal('addPatientModal')" class="btn btn-outline">Cancel</button><button type="submit" class="btn btn-primary">Register</button></div></form></div></div>
+
+<div id="invCheckModal" class="modal">
+  <div class="modal-content">
+    <div class="inv-check-header">
+      <div class="ic-icon"><i class="fas fa-search-plus"></i></div>
+      <div style="flex:1;">
+        <h3 style="color:#0f172a; font-size:1.15rem;">Batch Inventory Check</h3>
+        <p style="font-size:0.82rem; color:#64748b; margin-top:0.1rem;">Enter medicine names to check availability &amp; alternatives</p>
+      </div>
+      <button onclick="closeModal('invCheckModal')" style="background:none; border:none; font-size:1.5rem; color:#94a3b8; cursor:pointer; line-height:1;">&times;</button>
+    </div>
+    <div class="ic-input-area">
+      <label><i class="fas fa-pills"></i> &nbsp;Add Medicine Names</label>
+      <div class="ic-tags" id="icTags"></div>
+      <div class="ic-add-row">
+        <input type="text" id="icMedInput" placeholder="Type medicine name..." autocomplete="off">
+        <button class="ic-check-btn" style="padding:0.6rem 1.1rem; font-size:0.82rem;" onclick="icAddTag()"><i class="fas fa-plus"></i> Add</button>
+      </div>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+      <div class="ic-summary-bar" id="icSummaryBar"></div>
+      <button class="ic-check-btn" id="icCheckBtn" onclick="runInventoryCheck()"><i class="fas fa-magnifying-glass"></i> Check Inventory</button>
+    </div>
+    <div id="icResults"></div>
+  </div>
+</div>
+
+<div id="viewPatientModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3><i class="fas fa-user-circle" style="color:#2563eb;margin-right:0.5rem;"></i>Patient Details</h3>
+      <button onclick="closeModal('viewPatientModal')" style="background:none;border:none;font-size:1.5rem;color:#94a3b8;cursor:pointer;line-height:1;">&times;</button>
+    </div>
+    <div class="patient-profile-header">
+      <div class="patient-avatar" id="vpAvatar">👨</div>
+      <div class="patient-profile-info">
+        <h3 id="vpName"></h3>
+        <p id="vpSubtitle"></p>
+      </div>
+    </div>
+    <div class="patient-meta-row" id="vpMeta"></div>
+    <div class="rx-section-title"><i class="fas fa-history" style="color:#2563eb;"></i> Purchase History</div>
+    <div id="vpPrescriptions"></div>
+    <div style="text-align:right;margin-top:1rem;"><button class="btn btn-outline" onclick="closeModal('viewPatientModal')">Close</button></div>
+  </div>
+</div>
+
+<script>
+  const API_URL = "http://localhost:5000/api";
+
+  let medicines = [];
+  let patients = [];
+  let bills = [];
+  let cart = [];
+  let activeInvCategory = 'All';
+  let icTagList = [];
+
+  function getFetchOptions(method = "GET", body = null) {
+    const token = localStorage.getItem("medilong_jwt");
+    if (!token) return handleLogOut();
+    const options = {
+      method,
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    };
+    if (body) options.body = JSON.stringify(body);
+    return options;
+  }
+
+  async function syncAppDatabase() {
+    const options = getFetchOptions("GET");
+    if (!options) return;
+
+    try {
+      const resMeds = await fetch(`${API_URL}/medicines`, options);
+      if (resMeds.status === 401 || resMeds.status === 403) return handleLogOut();
+      medicines = await resMeds.json();
+      
+      const resPatients = await fetch(`${API_URL}/patients`, options);
+      patients = await resPatients.json();
+      
+      const resBills = await fetch(`${API_URL}/bills`, options);
+      bills = await resBills.json();
+
+      updateDashboard();
+      if (!document.getElementById('inventorySec').classList.contains('hidden')) renderInventory();
+      if (!document.getElementById('patientsSec').classList.contains('hidden')) renderPatients();
+      if (!document.getElementById('billingSec').classList.contains('hidden')) {
+        populateBillPatientDropdown();
+        renderBillSearch();
+        renderCart();
+        renderRecentBills();
+      }
+      if (!document.getElementById('expirySec').classList.contains('hidden')) renderExpiry();
+      if (!document.getElementById('analyticsSec').classList.contains('hidden')) renderAnalytics();
+    } catch(err) {
+      console.error("Sync routine failure:", err);
+    }
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    const activeUser = JSON.parse(localStorage.getItem("medilong_user"));
+    if (activeUser) {
+      document.getElementById("sidebarUserName").innerText = activeUser.name;
+      document.getElementById("sidebarUserRole").innerText = activeUser.role;
+    } else {
+      return handleLogOut();
+    }
+    syncAppDatabase();
+    setInterval(() => { document.getElementById('clock').innerHTML = new Date().toLocaleTimeString(); }, 1000);
+  });
+
+  function handleLogOut() {
+    localStorage.clear();
+    window.location.href = "/login.html";
+  }
+  document.getElementById("logoutBtn").addEventListener("click", handleLogOut);
+
+  // ======================== NAVIGATION ========================
+  function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+    document.getElementById(pageId + 'Sec').classList.remove('hidden');
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    
+    const matchedBtn = document.querySelector(`.nav-btn[data-page="${pageId}"]`);
+    if(matchedBtn) {
+      matchedBtn.classList.add('active');
+      document.getElementById('pageTitle').innerText = matchedBtn.querySelector('span').innerText;
+    }
+    
+    if(pageId === 'dashboard') updateDashboard();
+    if(pageId === 'inventory') renderInventory();
+    if(pageId === 'patients') renderPatients();
+    if(pageId === 'billing') { 
+      populateBillPatientDropdown();
+      handleBillPatientChange();
+      renderBillSearch(); 
+      renderCart(); 
+      renderRecentBills(); 
+    }
+    if(pageId === 'expiry') renderExpiry();
+    if(pageId === 'analytics') renderAnalytics();
+  }
+
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => { if(btn.id !== 'logoutBtn') showPage(btn.getAttribute('data-page')); });
+  });
+
+  // ======================== DASHBOARD ========================
+  function updateDashboard() {
+    let totalRev = bills.reduce((sum, b) => sum + b.total, 0);
+    let totalOrders = bills.length;
+    let lowStock = medicines.filter(m => m.qty <= m.threshold).length;
+    let expiring = medicines.filter(m => m.expiry && Math.ceil((new Date(m.expiry) - new Date())/(86400000)) <= 30 && Math.ceil((new Date(m.expiry) - new Date())/(86400000)) >= 0).length;
+    
+    document.getElementById('dashRevenue').innerText = totalRev.toLocaleString();
+    document.getElementById('dashOrders').innerText = totalOrders;
+    document.getElementById('dashLowStock').innerText = lowStock;
+    document.getElementById('dashExpiring').innerText = expiring;
+    document.getElementById('alertCount').innerText = lowStock + expiring;
+    
+    let productSales = {};
+    bills.forEach(b => {
+      b.items.forEach(item => { productSales[item.name] = (productSales[item.name] || 0) + item.qty; });
+    });
+    let topProducts = Object.entries(productSales).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    document.getElementById('topProductsList').innerHTML = topProducts.map(([name, qty]) => 
+      `<div class="flex-between" style="padding:0.5rem 0;"><span>${name}</span><span class="badge badge-info">${qty} sold</span></div>`
+    ).join('') || '<p>No sales records compiled yet</p>';
+    
+    let monthlyData = Array(12).fill(0);
+    bills.forEach(bill => {
+      let month = new Date(bill.date).getMonth();
+      monthlyData[month] += bill.total;
+    });
+    
+    if (window.revenueChart && typeof window.revenueChart.destroy === "function") window.revenueChart.destroy();
+    window.revenueChart = new Chart(document.getElementById('revenueChart'), { 
+      type: 'line', 
+      data: { 
+        labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], 
+        datasets: [{ label: 'Revenue (₹)', data: monthlyData, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.4 }] 
+      }, 
+      options: { responsive: true, maintainAspectRatio: true } 
+    });
+    
+    let tbody = document.querySelector('#recentTransactionsTable tbody');
+    tbody.innerHTML = '';
+    bills.slice(0,10).forEach(bill => {
+      tbody.innerHTML += `<tr><td>${bill.billId || bill._id.substring(18)}</td><td>${bill.patient || 'Walk-in'}</td><td>₹${bill.total}</td><td>${new Date(bill.date).toLocaleDateString()}</td><td><span class="badge badge-success">Completed</span></td></tr>`;
+    });
+  }
+
+  // ======================== INVENTORY ========================
+  function filterInvCategory(cat) { activeInvCategory = cat; renderInventory(); }
+
+  function getCategoryIcon(cat) {
+    switch(cat) {
+      case 'Tablet': return '<i class="fas fa-pills" style="color: #3b82f6;"></i>';
+      case 'Capsule': return '<i class="fas fa-capsules" style="color: #8b5cf6;"></i>';
+      case 'Syrup': return '<i class="fas fa-prescription-bottle" style="color: #f59e0b;"></i>';
+      case 'Injection': return '<i class="fas fa-syringe" style="color: #ef4444;"></i>';
+      default: return '<i class="fas fa-box" style="color: #64748b;"></i>';
+    }
+  }
+
+  function renderInventory() {
+    let search = document.getElementById('searchInv')?.value.toLowerCase() || '';
+    let container = document.getElementById('inventoryList');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    let cats = ['All', 'Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream', 'Lotion', 'Others'];
+    document.getElementById('inventoryCategoryFilters').innerHTML = cats.map(cat => {
+      let count = cat === 'All' ? medicines.length : medicines.filter(m => (m.category || 'Others') === cat).length;
+      return `<button class="btn btn-sm ${activeInvCategory === cat ? 'btn-primary' : 'btn-outline'}" onclick="filterInvCategory('${cat}')" style="border-radius:20px; font-weight:600; font-size:0.8rem; margin:2px;">${cat} (${count})</button>`;
+    }).join('');
+    
+    let filtered = medicines.filter(m => m.name.toLowerCase().includes(search) || (m.sku || '').toLowerCase().includes(search));
+    if (activeInvCategory !== 'All') filtered = filtered.filter(m => (m.category || 'Others') === activeInvCategory);
+    
+    if (filtered.length === 0) {
+      container.innerHTML = '<p class="text-center" style="color: #64748b; padding: 2rem;">No medicines matched conditions.</p>';
+      return;
+    }
+    
+    let grouped = {};
+    filtered.forEach(m => {
+      let cat = m.category || 'Others';
+      if (!grouped[cat]) grouped[cat] = [];
+      grouped[cat].push(m);
+    });
+    
+    cats.slice(1).forEach(cat => {
+      let items = grouped[cat];
+      if (!items || items.length === 0) return;
+      
+      let sectionHtml = `<div class="category-group" style="margin-bottom: 2rem;"><h3 style="font-size:1.15rem; font-weight:700; color:#1e3a5f; margin-bottom:1rem; display:flex; align-items:center; gap:0.6rem; border-bottom:2px solid #e2e8f0; padding-bottom:0.5rem;">${getCategoryIcon(cat)} ${cat}s</h3><div class="inventory-grid">`;
+      
+      items.forEach(m => {
+        let isLow = m.qty <= m.threshold;
+        let isExpiring = m.expiry && Math.ceil((new Date(m.expiry) - new Date())/(86400000)) <= 30;
+          
+        sectionHtml += `
+          <div class="inventory-item">
+            <div class="flex-between">
+              <div><strong>${m.name}</strong><br><small style="color:#64748b;">${m.dosage || ''} | SKU: ${m.sku || '—'}</small></div>
+              <div>
+                <button onclick="editMedicine('${m._id}')" style="background:none; border:none; color:#3b82f6; cursor:pointer; margin-right:8px;"><i class="fas fa-edit"></i></button>
+                <button onclick="deleteMedicine('${m._id}')" style="background:none; border:none; color:#dc2626; cursor:pointer;"><i class="fas fa-trash"></i></button>
+              </div>
+            </div>
+            <div class="mt-2" style="border-top:1px dashed #e2e8f0; padding-top:0.6rem; margin-top:0.6rem;">
+              <div class="flex-between" style="align-items:flex-end;">
+                <div>
+                  <span style="font-size:1.2rem; font-weight:700; color:#2563eb;">₹${m.price}</span><br>
+                  <span style="font-size:0.85rem; color:#475569;">Stock: <strong style="${isLow ? 'color:#dc2626;' : ''}">${m.qty} units</strong></span>
+                  ${isLow ? '<span class="badge badge-danger">Low</span>' : ''}
+                  ${isExpiring ? '<span class="badge badge-warning">Expiring</span>' : ''}
+                </div>
+                <button onclick="sellQuickUnit('${m._id}')" class="btn btn-primary btn-sm">Sell 1</button>
+              </div>
+            </div>
+          </div>`;
+      });
+      sectionHtml += `</div></div>`;
+      container.innerHTML += sectionHtml;
+    });
+  }
+
+  async function sellQuickUnit(mongoId) {
+    let med = medicines.find(m => m._id === mongoId);
+    if (!med || med.qty <= 0) return alert('Target out of stock!');
+    const options = getFetchOptions("PUT", { qty: med.qty - 1 });
+    try {
+      const res = await fetch(`${API_URL}/medicines/${mongoId}`, options);
+      if(res.ok) syncAppDatabase();
+    } catch(err) { console.error(err); }
+  }
+
+  function editMedicine(mongoId) {
+    let med = medicines.find(m => m._id === mongoId);
+    if(!med) return;
+    document.getElementById('medName').value = med.name;
+    document.getElementById('medSku').value = med.sku || '';
+    document.getElementById('medDosage').value = med.dosage || '';
+    document.getElementById('medPrice').value = med.price;
+    document.getElementById('medQty').value = med.qty;
+    document.getElementById('medThreshold').value = med.threshold;
+    document.getElementById('medExpiry').value = med.expiry ? med.expiry.substring(0,10) : '';
+    document.getElementById('medCategory').value = med.category || 'Tablet';
+    window.editMedicineId = mongoId;
+    showModal('addMedicineModal');
+  }
+
+  async function deleteMedicine(mongoId) {
+    if(confirm('Remove this medicine permanently from database?')) {
+      try {
+        const res = await fetch(`${API_URL}/medicines/${mongoId}`, getFetchOptions("DELETE"));
+        if (res.ok) syncAppDatabase();
+      } catch(err) { console.error(err); }
+    }
+  }
+
+  // ======================== PATIENTS ========================
+  function renderPatients() {
+    let tbody = document.querySelector('#patientsTable tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    patients.forEach(p => {
+      tbody.innerHTML += `<tr><td>${p._id.substring(18)}</td><td>${p.name}</td><td>${p.age || 'N/A'}/${p.gender}</td><td>${p.phone}</td><td><button class="btn btn-outline btn-sm" onclick="viewPatientMedicalCard('${p._id}')">View History</button></td></tr>`;
+    });
+  }
+
+  function viewPatientMedicalCard(mongoId) {
+    let patient = patients.find(p => p._id === mongoId);
+    if (!patient) return;
+    document.getElementById('vpName').innerText = patient.name;
+    document.getElementById('vpSubtitle').innerText = `${patient.age || '??'} yrs · ${patient.gender}`;
+    document.getElementById('vpMeta').innerHTML = `<span class="patient-meta-chip"><i class="fas fa-phone"></i> ${patient.phone}</span>`;
+    
+    let matchingBills = bills.filter(b => b.patientId === mongoId);
+    let rxContainer = document.getElementById('vpPrescriptions');
+    if (matchingBills.length === 0) {
+      rxContainer.innerHTML = `<div class="rx-empty">No invoices found for this patient.</div>`;
+    } else {
+      rxContainer.innerHTML = matchingBills.map(bill => {
+        let itemsHtml = bill.items.map(m => `<tr><td><strong>${m.name}</strong></td><td>${m.qty} unit(s)</td><td>Subtotal: ₹${m.price * m.qty}</td></tr>`).join('');
+        return `<div class="rx-card"><div class="rx-card-header"><span>Tx Ref: ${bill.billId || bill._id}</span></div><table class="rx-medicine-table"><tbody>${itemsHtml}</tbody></table></div>`;
+      }).join('');
+    }
+    showModal('viewPatientModal');
+  }
+
+  // ======================== BILLING ========================
+  function renderBillSearch() {
+    let search = document.getElementById('billSearch')?.value.toLowerCase() || '';
+    let container = document.getElementById('billSearchResults');
+    if(!container) return;
+    container.innerHTML = '';
+    medicines.filter(m => m.name.toLowerCase().includes(search) && m.qty > 0).forEach(m => {
+      container.innerHTML += `<div class="flex-between" style="padding:0.5rem; border-bottom:1px solid #e2e8f0;"><div><strong>${m.name}</strong><br><small>₹${m.price} | Stock: ${m.qty}</small></div><button onclick="addCartItem('${m._id}')" class="btn btn-primary btn-sm">Add</button></div>`;
+    });
+  }
+
+  function addCartItem(mongoId) {
+    let med = medicines.find(m => m._id === mongoId);
+    if(!med || med.qty <= 0) return alert('Out of stock!');
+    let existing = cart.find(c => c.id === mongoId);
+    if(existing) {
+      if(existing.qty >= med.qty) return alert('Exceeds available stock!');
+      existing.qty++;
+    } else {
+      cart.push({ id: med._id, name: med.name, price: med.price, qty: 1 });
+    }
+    renderCart();
+  }
+
+  function renderCart() {
+    let container = document.getElementById('cartItems');
+    if(!container) return;
+    container.innerHTML = '';
+    let total = 0;
+    cart.forEach((item, idx) => {
+      let subtotal = item.price * item.qty;
+      total += subtotal;
+      container.innerHTML += `<div class="flex-between" style="padding:0.5rem; border-bottom:1px solid #e2e8f0;"><div><strong>${item.name}</strong> x${item.qty} = ₹${subtotal}</div><button onclick="removeCartItem(${idx})" style="background:none; border:none; color:#dc2626; cursor:pointer;">Remove</button></div>`;
+    });
+    document.getElementById('cartTotal').innerText = total;
+  }
+
+  function removeCartItem(idx) { cart.splice(idx, 1); renderCart(); }
+
+  function populateBillPatientDropdown() {
+    let select = document.getElementById('billPatientSelect');
+    if (!select) return;
+    let options = '<option value="new">-- Register New Patient / Walk-in --</option>';
+    patients.forEach(p => { options += `<option value="${p._id}">${p.name} (${p.phone})</option>`; });
+    select.innerHTML = options;
+  }
+
+  function handleBillPatientChange() {
+    let select = document.getElementById('billPatientSelect');
+    let newFields = document.getElementById('newPatientFields');
+    let infoBlock = document.getElementById('selectedPatientInfo');
+    if (select.value === 'new') {
+      newFields.classList.remove('hidden');
+      infoBlock.classList.add('hidden');
+    } else {
+      newFields.classList.add('hidden');
+      infoBlock.classList.remove('hidden');
+      let patient = patients.find(p => p._id === select.value);
+      if (patient) {
+        document.getElementById('billSelectedPatientName').innerText = patient.name;
+        document.getElementById('billSelectedPatientPhone').innerText = patient.phone;
+        document.getElementById('billSelectedPatientMeta').innerText = `${patient.gender} / ${patient.age || '??'} yrs`;
+      }
+    }
+  }
+
+  async function processCheckout() {
+    if(cart.length === 0) return alert('Cart is empty!');
+    let targetPatientId = null;
+    let targetPatientName = '';
+    let selectVal = document.getElementById('billPatientSelect').value;
+
+    if (selectVal === 'new') {
+      let nameVal = document.getElementById('billPatientName').value.trim();
+      let phoneVal = document.getElementById('billPatientPhone').value.trim();
+      if (!nameVal || !phoneVal) return alert('Please enter patient Name and Phone.');
+      
+      let match = patients.find(p => p.phone === phoneVal);
+      if (match) {
+        targetPatientId = match._id;
+        targetPatientName = match.name;
+      } else {
+        let newPatPayload = {
+          name: nameVal, phone: phoneVal,
+          age: document.getElementById('billPatientAge').value ? parseInt(document.getElementById('billPatientAge').value) : '',
+          gender: document.getElementById('billPatientGender').value,
+          address: document.getElementById('billPatientAddress').value.trim()
+        };
+        const pRes = await fetch(`${API_URL}/patients`, getFetchOptions("POST", newPatPayload));
+        const createdPatient = await pRes.json();
+        targetPatientId = createdPatient._id;
+        targetPatientName = createdPatient.name;
+      }
+    } else {
+      let existingObj = patients.find(p => p._id === selectVal);
+      targetPatientId = existingObj._id;
+      targetPatientName = existingObj.name;
+    }
+
+    let checkoutPayload = {
+      billId: 'BILL-' + Date.now(),
+      items: [...cart],
+      total: parseFloat(document.getElementById('cartTotal').innerText),
+      method: document.getElementById('paymentMethod').value,
+      patientId: targetPatientId,
+      patient: targetPatientName
+    };
+
+    try {
+      const bRes = await fetch(`${API_URL}/bills`, getFetchOptions("POST", checkoutPayload));
+      if(bRes.ok) {
+        alert(`✅ Checkout successful! Total: ₹${checkoutPayload.total}`);
+        cart = [];
+        document.getElementById('billPatientName').value = '';
+        document.getElementById('billPatientPhone').value = '';
+        document.getElementById('billPatientAge').value = '';
+        document.getElementById('billPatientAddress').value = '';
+        syncAppDatabase();
+      } else {
+        const errorData = await bRes.json();
+        alert("Server rejected transaction: " + errorData.error);
+      }
+    } catch(err) { console.error(err); }
+  }
+
+  function renderRecentBills() {
+    let container = document.getElementById('recentBillsList');
+    if(!container) return;
+    container.innerHTML = '';
+    bills.slice(0,10).forEach(b => {
+      container.innerHTML += `<div class="flex-between" style="padding:0.5rem; border-bottom:1px solid #e2e8f0;"><div><strong>${b.billId || b._id.substring(18)}</strong><br><small>${new Date(b.date).toLocaleString()}</small></div><div><span style="font-weight:600;">₹${b.total}</span><br><small>${b.method}</small></div></div>`;
+    });
+  }
+
+  // ======================== EXPIRY ========================
+  function renderExpiry() {
+    let now = new Date();
+    let expired = [], expiring = [], all = [];
+    medicines.forEach(m => {
+      if(!m.expiry) return;
+      let days = Math.ceil((new Date(m.expiry) - now) / 86400000);
+      let html = `<div class="flex-between" style="padding:0.5rem; border-bottom:1px solid #e2e8f0;"><div><strong>${m.name}</strong><br><small>Expiry: ${m.expiry.substring(0,10)} | ${days<0 ? 'Expired' : days + ' days left'}</small></div></div>`;
+      all.push(html);
+      if(days < 0) expired.push(html);
+      else if(days <= 30) expiring.push(html);
+    });
+    document.getElementById('expiredList').innerHTML = expired.join('') || '<p>No expired stock.</p>';
+    document.getElementById('expiringList').innerHTML = expiring.join('') || '<p>No items expiring soon.</p>';
+    document.getElementById('allExpiryList').innerHTML = all.join('') || '<p>No expiry logs loaded.</p>';
+  }
+
+  // ======================== ANALYTICS ========================
+  function renderAnalytics() {
+    let totalSales = bills.reduce((sum, b) => sum + b.total, 0);
+    document.getElementById('avgOrderValue').innerText = bills.length ? Math.round(totalSales / bills.length) : 0;
+    
+    let labels = medicines.slice(0,10).map(m => m.name.substring(0,15));
+    let movementData = medicines.slice(0,10).map(m => m.sales?.reduce((s, sale) => s + sale.qty, 0) || 0);
+    
+    if(window.stockChart) window.stockChart.destroy();
+    window.stockChart = new Chart(document.getElementById('stockMovementChart'), { 
+      type: 'bar', 
+      data: { labels, datasets: [{ label: 'Units Sold', data: movementData, backgroundColor: '#3b82f6', borderRadius: 8 }] }
+    });
+  }
+
+  function showModal(id) { document.getElementById(id).style.display = 'flex'; }
+  function closeModal(id) { document.getElementById(id).style.display = 'none'; window.editMedicineId = null; }
+  window.onclick = (e) => { if(e.target.classList.contains('modal')) closeModal(e.target.id); };
+
+  document.getElementById('addMedicineForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    let bodyData = {
+      name: document.getElementById('medName').value,
+      sku: document.getElementById('medSku').value,
+      dosage: document.getElementById('medDosage').value,
+      price: parseFloat(document.getElementById('medPrice').value),
+      qty: parseInt(document.getElementById('medQty').value),
+      threshold: parseInt(document.getElementById('medThreshold').value),
+      category: document.getElementById('medCategory').value
+    };
+    if(document.getElementById('medExpiry').value) bodyData.expiry = document.getElementById('medExpiry').value;
+
+    let url = `${API_URL}/medicines`;
+    let method = "POST";
+    if(window.editMedicineId) {
+      url = `${API_URL}/medicines/${window.editMedicineId}`;
+      method = "PUT";
+    }
+
+    const res = await fetch(url, getFetchOptions(method, bodyData));
+    if(res.ok) { closeModal('addMedicineModal'); e.target.reset(); syncAppDatabase(); }
+  });
+
+  document.getElementById('addPatientForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    let bodyData = {
+      name: document.getElementById('patName').value,
+      age: parseInt(document.getElementById('patAge').value),
+      gender: document.getElementById('patGender').value,
+      phone: document.getElementById('patPhone').value,
+      email: document.getElementById('patEmail').value,
+      address: document.getElementById('patAddress').value
+    };
+    const res = await fetch(`${API_URL}/patients`, getFetchOptions("POST", bodyData));
+    if(res.ok) { closeModal('addPatientModal'); e.target.reset(); syncAppDatabase(); }
+  });
+
+  function icAddTag() {
+    let val = document.getElementById('icMedInput').value.trim();
+    if (!val) return;
+    if (icTagList.find(t => t.toLowerCase() === val.toLowerCase())) {
+      document.getElementById('icMedInput').value = '';
+      return;
+    }
+    icTagList.push(val);
+    renderIcTags();
+    document.getElementById('icMedInput').value = '';
+  }
+
+  function icRemoveTag(idx) { icTagList.splice(idx, 1); renderIcTags(); }
+
+  function renderIcTags() {
+    let container = document.getElementById('icTags');
+    if (icTagList.length === 0) {
+      container.innerHTML = '<span style="font-size:0.8rem; color:#94a3b8; font-style:italic;">No medicines added yet...</span>';
+      return;
+    }
+    container.innerHTML = icTagList.map((t, i) => `<span class="ic-tag">${t}<button onclick="icRemoveTag(${i})">&times;</button></span>`).join('');
+  }
+
+  function icNormalize(str) { return str.toLowerCase().replace(/[^a-z0-9]/g, ''); }
+
+  function findAlternatives(queryName, refMed) {
+    let queryNorm = icNormalize(queryName);
+    let queryWords = queryName.toLowerCase().split(/[\s,+]+/).filter(w => w.length > 3);
+    let refDosageNorm = refMed ? icNormalize(refMed.dosage || '') : '';
+    let refDosageWords = refMed ? (refMed.dosage || '').toLowerCase().split(/[\s,+]+/).filter(w => w.length > 3) : [];
+    let scored = [];
+
+    medicines.forEach(m => {
+      if (refMed && m._id === refMed._id) return;
+      if (m.qty <= 0) return;
+      let mNorm = icNormalize(m.name);
+      let mDosage = icNormalize(m.dosage || '');
+      let tier = 0, label = '';
+
+      if (refDosageNorm && mDosage && mDosage === refDosageNorm) { tier = 1; label = 'exact'; }
+      else if (refDosageWords.length > 0 && refDosageWords.some(dw => mDosage.includes(icNormalize(dw)))) { tier = 2; label = 'high'; }
+      else if (queryWords.some(w => mDosage.includes(icNormalize(w)))) { tier = 2; label = 'high'; }
+      else if (queryWords.some(w => mNorm.includes(icNormalize(w)))) { tier = 3; label = 'medium'; }
+      else {
+        let prefix = queryNorm.substring(0, 5);
+        if (prefix.length >= 4 && mNorm.includes(prefix)) { tier = 4; label = 'low'; }
+      }
+      if (tier > 0) scored.push({ med: m, tier, label });
+    });
+    return scored.sort((a, b) => a.tier - b.tier || b.med.qty - a.med.qty).slice(0, 5);
+  }
+
+  function runInventoryCheck() {
+    if (icTagList.length === 0) return;
+    let found = 0, missing = 0, html = '';
+
+    icTagList.forEach(query => {
+      let qn = icNormalize(query);
+      let med = medicines.find(m => icNormalize(m.name) === qn && m.qty > 0);
+      if (!med) med = medicines.find(m => icNormalize(m.name).includes(qn) && m.qty > 0);
+
+      if (med) {
+        found++;
+        html += `<div class="ic-result-item found"><div class="ic-status-icon"><i class="fas fa-check"></i></div><div class="ic-result-body"><div class="ic-med-name">${query}</div><div class="ic-med-detail"><strong>${med.name}</strong> &nbsp;<span class="ic-stock-badge">${med.qty} units</span> &nbsp;<span class="ic-price-badge">₹${med.price}</span></div></div></div>`;
+      } else {
+        missing++;
+        let outOfStock = medicines.find(m => icNormalize(m.name).includes(qn));
+        let alts = findAlternatives(query, outOfStock || null);
+        let altHtml = '';
+        
+        if (alts.length > 0) {
+          let best = alts[0];
+          altHtml = `<div class="ic-alt-section"><div class="ic-best-alt"><div class="ic-best-alt-icon"><i class="fas fa-star"></i></div><div class="ic-best-alt-body"><div class="ic-best-alt-name">${best.med.name}</div><div class="ic-best-alt-detail">Stock: ${best.med.qty} units | ₹${best.med.price}</div></div></div></div>`;
+        } else {
+          altHtml = `<div class="ic-alt-section"><span class="ic-no-alt">No matching alternatives in stock.</span></div>`;
+        }
+        html += `<div class="ic-result-item not-found"><div class="ic-status-icon"><i class="fas fa-xmark"></i></div><div class="ic-result-body"><div class="ic-med-name">${query}</div><div class="ic-med-detail" style="color:#b91c1c;">Out of Stock</div>${altHtml}</div></div>`;
+      }
+    });
+    document.getElementById('icResults').innerHTML = html;
+    document.getElementById('icSummaryBar').innerHTML = `<span class="ic-summary-chip total">${icTagList.length} Checked</span><span class="ic-summary-chip avail">${found} Found</span><span class="ic-summary-chip missing">${missing} Empty</span>`;
+  }
+  function openInvChecker() { icTagList = []; document.getElementById('icTags').innerHTML = ''; document.getElementById('icResults').innerHTML = ''; document.getElementById('icSummaryBar').innerHTML = ''; showModal('invCheckModal'); }
+  function exportReport() { alert('Report exported.'); }
+</script>
+</body>
+</html>

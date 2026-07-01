@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediLong · Gatekeeper Authentication Portal</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f5f7fb;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1.5rem;
+    }
+
+    .auth-container {
+      background: #ffffff;
+      max-width: 450px;
+      width: 100%;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+      border: 1px solid #e2e8f0;
+      padding: 2.5rem 2rem;
+      overflow: hidden;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .brand-icon {
+      background: linear-gradient(135deg, #1e40af, #3b82f6);
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .brand-text {
+      font-weight: 800;
+      font-size: 1.6rem;
+      color: #1e3a5f;
+    }
+
+    .brand-text span {
+      color: #3b82f6;
+    }
+
+    .brand-subtitle {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: -0.25rem;
+    }
+
+    .auth-tabs {
+      display: flex;
+      background: #f1f5f9;
+      padding: 0.3rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+    }
+
+    .auth-tab {
+      flex: 1;
+      text-align: center;
+      padding: 0.6rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #64748b;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .auth-tab.active {
+      background: #ffffff;
+      color: #2563eb;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.4rem;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-wrapper i {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      font-size: 1rem;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.8rem;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      background: #ffffff;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 0.8rem;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    }
+
+    .btn-submit:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .alert {
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+    }
+
+    .alert-danger {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+
+    .alert-success {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #86efac;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="auth-container">
+  <div class="brand">
+    <div class="brand-icon"><i class="fas fa-hospital-user"></i></div>
+    <h1 class="brand-text">Medi<span>LONG</span></h1>
+    <p class="brand-subtitle">Hospital Pharmacy Management System</p>
+  </div>
+
+  <div class="auth-tabs">
+    <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+    <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Create Account</button>
+  </div>
+
+  <div id="authAlert" class="alert"></div>
+
+  <form id="loginForm">
+    <div class="form-group">
+      <label for="loginEmail">Email Address</label>
+      <div class="input-wrapper">
+        <i class="fas fa-envelope"></i>
+        <input type="email" id="loginEmail" placeholder="name@hospital.com" required>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="loginPassword">Password</label>
+      <div class="input-wrapper">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="loginPassword" placeholder="••••••••" required>
+      </div>
+    </div>
+    <button type="submit" class="btn-submit" id="loginBtn">
+      <span>Sign Into Terminal</span> <i class="fas fa-arrow-right"></i>
+    </button>
+  </form>
+
+  <form id="registerForm" class="hidden">
+    <div class="form-group">
+      <label for="regName">Full Name</label>
+      <div class="input-wrapper">
+        <i class="fas fa-user"></i>
+        <input type="text" id="regName" placeholder="Dr. John Doe" required>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="regEmail">Email Address</label>
+      <div class="input-wrapper">
+        <i class="fas fa-envelope"></i>
+        <input type="email" id="regEmail" placeholder="staff@hospital.com" required>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="regPassword">Password</label>
+      <div class="input-wrapper">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="regPassword" placeholder="Minimum 6 characters" minlength="6" required>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="regRole">Access Authorization Level</label>
+      <div class="input-wrapper">
+        <i class="fas fa-user-shield"></i>
+        <select id="regRole">
+          <option value="Pharmacist">Pharmacist (Staff Counter)</option>
+          <option value="Admin">Chief Hospital Administrator (Admin)</option>
+        </select>
+      </div>
+    </div>
+    <button type="submit" class="btn-submit" id="registerBtn">
+      <span>Register Terminal Credentials</span> <i class="fas fa-user-plus"></i>
+    </button>
+  </form>
+</div>
+
+<script>
+  const API_BASE = "http://localhost:5000/api/auth";
+
+  // Check if token exists, bypass if already authenticated
+  if (localStorage.getItem("medilong_jwt")) {
+    window.location.href = "/Med.html";
+  }
+
+  function displayAlert(type, message) {
+    const alertBox = document.getElementById("authAlert");
+    alertBox.className = `alert alert-${type}`;
+    alertBox.innerHTML = `<i class="fas ${type === 'danger' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i> <span>${message}</span>`;
+    alertBox.style.display = "flex";
+  }
+
+  function clearAlert() {
+    document.getElementById("authAlert").style.display = "none";
+  }
+
+  function switchTab(target) {
+    clearAlert();
+    if (target === 'login') {
+      document.getElementById("tabLogin").classList.add("active");
+      document.getElementById("tabRegister").classList.remove("active");
+      document.getElementById("loginForm").classList.remove("hidden");
+      document.getElementById("registerForm").classList.add("hidden");
+    } else {
+      document.getElementById("tabLogin").classList.remove("active");
+      document.getElementById("tabRegister").classList.add("active");
+      document.getElementById("loginForm").classList.add("hidden");
+      document.getElementById("registerForm").classList.remove("hidden");
+    }
+  }
+
+  // --- LOGIN OPERATION ---
+  document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearAlert();
+    const btn = document.getElementById("loginBtn");
+    btn.disabled = true;
+
+    const payload = {
+      email: document.getElementById("loginEmail").value.trim(),
+      password: document.getElementById("loginPassword").value
+    };
+
+    try {
+      const response = await fetch(`${API_BASE}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Authentication execution failed.");
+      }
+
+      // Store Token & metadata inside local persistent layers
+      localStorage.setItem("medilong_jwt", data.token);
+      localStorage.setItem("medilong_user", JSON.stringify(data.user));
+
+      displayAlert("success", "Access granted! Redirecting to dashboard context...");
+      setTimeout(() => { window.location.href = "/Med.html"; }, 1000);
+
+    } catch (err) {
+      displayAlert("danger", err.message);
+      btn.disabled = false;
+    }
+  });
+
+  // --- REGISTER OPERATION ---
+  document.getElementById("registerForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearAlert();
+    const btn = document.getElementById("registerBtn");
+    btn.disabled = true;
+
+    const payload = {
+      name: document.getElementById("regName").value.trim(),
+      email: document.getElementById("regEmail").value.trim(),
+      password: document.getElementById("regPassword").value,
+      role: document.getElementById("regRole").value
+    };
+
+    try {
+      const response = await fetch(`${API_BASE}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Registration system block error.");
+      }
+
+      displayAlert("success", "Registration successful! You can sign in now.");
+      e.target.reset();
+      setTimeout(() => { switchTab('login'); }, 1500);
+
+    } catch (err) {
+      displayAlert("danger", err.message);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
