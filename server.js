@@ -11,7 +11,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
-
+app.get("/", (req, res) => {
+    res.sendFile(__dirname + "/login.html");
+});
 const JWT_SECRET = "KAMALESH"; // Remember to use an environment variable in production
 
 // ======================== MONGOOSE DATABASE CONNECTION ========================
