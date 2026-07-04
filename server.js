@@ -16,7 +16,6 @@ const JWT_SECRET = "KAMALESH"; // Remember to use an environment variable in pro
 
 // ======================== MONGOOSE DATABASE CONNECTION ========================
 mongoose.connect(process.env.MONGO_URI)
-JWT_SECRET=KAMALESH
   .then(async () => {
     console.log("💾 Connected to MongoDB");
     
