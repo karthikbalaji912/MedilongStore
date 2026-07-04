@@ -45,7 +45,7 @@ client.on("qr", (qr) => {
 });
 
 client.on("ready", () => console.log("✅ WhatsApp is ready!"));
-client.initialize();
+//client.initialize();
 
 // Helper helper for WhatsApp alerts
 // ======================== CRASH-PROOF WHATSAPP ALERT FUNCTION ========================
